@@ -13,15 +13,14 @@ st.markdown(
         color: #333333;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    /* Header */
-    .header {
-        background-color: #004080;
-        padding: 2rem 1rem;
-        color: white;
-        text-align: center;
-        border-radius: 0 0 20px 20px;
+    /* Header text */
+    .header-text {
+        color: #004080;
         font-weight: 700;
-        font-size: 3rem;
+        font-size: 3.5rem;
+        text-align: center;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
         letter-spacing: 2px;
     }
     /* Phase cards */
@@ -73,29 +72,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Header with background image
-st.markdown(
-    """
-    <div style="
-        background-image: url('https://www.tqmi.com/wp-content/uploads/2022/02/How-Can-Lean-Six-Sigma-Help-You-To-Accomplish-Goals.webp');
-        background-size: cover;
-        background-position: center;
-        height: 300px;
-        border-radius: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 3.5rem;
-        font-weight: 700;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
-        margin-bottom: 2rem;
-    ">
-        Lean Six Sigma
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+# Header text
+st.markdown('<div class="header-text">Lean Six Sigma</div>', unsafe_allow_html=True)
+
+# Embed the large dramatic video as header
+video_url = "https://amundi-my.sharepoint.com/personal/sachin_singh_amundi_com/Documents/A_large_dramatic_202507231819.mp4?csf=1&web=1&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=UIxLho"
+
+st.video(video_url, start_time=0)
 
 # Phases list
 phases = ["Define", "Measure", "Analyze", "Improve", "Control"]
