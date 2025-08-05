@@ -1,85 +1,55 @@
 import streamlit as st
 
-st.set_page_config(page_title="Lean Six Sigma Circular Layout", layout="wide")
+st.set_page_config(page_title="Lean Six Sigma Circular Phases", layout="wide")
 
-# CSS for circle layout and styling buttons as circles
+# CSS for circular layout and styling
 st.markdown(
     """
     <style>
-    .circle-wrapper {
+    .circle-container {
         position: relative;
-        width: 450px;
-        height: 450px;
+        width: 400px;
+        height: 400px;
         margin: 2rem auto 3rem auto;
-        border: 4px solid #004080;
-        border-radius: 50%;
-        background: radial-gradient(circle at center, #e6f0ff 60%, transparent 100%);
     }
-    /* Style for buttons as circles */
-    div.stButton > button {
-        all: unset;
+    .circle-item {
         position: absolute;
-        width: 110px;
-        height: 110px;
+        width: 120px;
+        height: 120px;
         background: linear-gradient(135deg, #0073e6, #004080);
         color: white;
         border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-weight: 700;
         font-size: 1.1rem;
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        user-select: none;
         text-align: center;
         padding: 10px;
-        user-select: none;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        border: 3px solid transparent;
-        user-select: none;
-        /* Center text vertically */
-        line-height: normal;
     }
-    div.stButton > button:hover {
+    .circle-item:hover {
         transform: scale(1.1);
         box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
-    /* Selected button style */
-    div.stButton > button.selected {
-        background: linear-gradient(135deg, #0059b3, #003366) !important;
-        box-shadow: 0 0 20px 6px #003366 !important;
-        transform: scale(1.2) !important;
-        border-color: #001f4d !important;
+    /* Positions for 5 items in circle */
+    .pos-define { top: 10%; left: 40%; }
+    .pos-measure { top: 35%; left: 75%; }
+    .pos-analyze { top: 70%; left: 60%; }
+    .pos-improve { top: 70%; left: 15%; }
+    .pos-control { top: 35%; left: 5%; }
+
+    /* Selected phase style */
+    .selected {
+        background: linear-gradient(135deg, #0059b3, #003366);
+        box-shadow: 0 0 15px 5px #003366;
+        transform: scale(1.2);
         z-index: 10;
     }
-    /* Positions for buttons in circle (clockwise starting top) */
-    #btn-Define {
-        top: 5%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    #btn-Measure {
-        top: 30%;
-        left: 85%;
-        transform: translate(-50%, -50%);
-    }
-    #btn-Analyze {
-        top: 70%;
-        left: 75%;
-        transform: translate(-50%, -50%);
-    }
-    #btn-Improve {
-        top: 70%;
-        left: 25%;
-        transform: translate(-50%, -50%);
-    }
-    #btn-Control {
-        top: 30%;
-        left: 15%;
-        transform: translate(-50%, -50%);
-    }
+
     /* Content container */
     .content-container {
         max-width: 900px;
@@ -106,43 +76,42 @@ st.markdown(
 )
 
 # Title
-st.markdown(
-    '<h1 style="text-align:center; color:#004080; font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;">Lean Six Sigma</h1>',
-    unsafe_allow_html=True,
-)
+st.markdown('<h1 style="text-align:center; color:#004080; font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;">Lean Six Sigma</h1>', unsafe_allow_html=True)
 
-# Phases list in order
-phases = ["Define", "Measure", "Analyze", "Improve", "Control"]
+# Define phases and their positions
+phases = [
+    ("Define", "pos-define"),
+    ("Measure", "pos-measure"),
+    ("Analyze", "pos-analyze"),
+    ("Improve", "pos-improve"),
+    ("Control", "pos-control"),
+]
 
 # Initialize session state for selected phase
 if "selected_phase" not in st.session_state:
     st.session_state.selected_phase = "Define"
 
-# Container for circle buttons
-circle_container = st.container()
+# Function to render the circle with clickable phases
+def render_circle(selected):
+    html = '<div class="circle-container">'
+    for phase, pos in phases:
+        cls = "circle-item " + pos
+        if phase == selected:
+            cls += " selected"
+        # Use a clickable div with onclick to send phase name to Streamlit via query params
+        # Since Streamlit can't handle JS events directly, we use buttons below instead
+        html += f'<div class="{cls}" id="{phase}">{phase}</div>'
+    html += "</div>"
+    st.markdown(html, unsafe_allow_html=True)
 
-with circle_container:
-    st.markdown('<div class="circle-wrapper">', unsafe_allow_html=True)
-    for phase in phases:
-        is_selected = (phase == st.session_state.selected_phase)
-        btn_class = "selected" if is_selected else ""
-        # Use st.button with unique key and id for CSS positioning
-        clicked = st.button(phase, key=f"btn-{phase}", help=f"Select {phase} phase")
-        # Add CSS id to button container using st.markdown hack
-        st.markdown(
-            f"""
-            <style>
-            div.stButton > button[key="{f'btn-{phase}'}"] {{
-                position: absolute !important;
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-        # If clicked, update selected phase
-        if clicked:
-            st.session_state.selected_phase = phase
-    st.markdown('</div>', unsafe_allow_html=True)
+# Render the circle (non-clickable, just for visual)
+render_circle(st.session_state.selected_phase)
+
+# Below the circle, create buttons for each phase to handle clicks
+cols = st.columns(len(phases))
+for i, (phase, _) in enumerate(phases):
+    if cols[i].button(phase):
+        st.session_state.selected_phase = phase
 
 # Content for each phase (example content for Define, placeholders for others)
 phase_contents = {
