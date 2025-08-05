@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Lean Six Sigma Circular Phases", layout="wide")
 
-# CSS for circular layout and styling
+# CSS for circular layout and styling buttons as circles
 st.markdown(
     """
     <style>
@@ -12,7 +12,9 @@ st.markdown(
         height: 400px;
         margin: 2rem auto 3rem auto;
     }
-    .circle-item {
+    /* Hide default Streamlit button style */
+    div.stButton > button {
+        all: unset;
         position: absolute;
         width: 120px;
         height: 120px;
@@ -30,26 +32,43 @@ st.markdown(
         user-select: none;
         text-align: center;
         padding: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        border: 3px solid transparent;
     }
-    .circle-item:hover {
+    div.stButton > button:hover {
         transform: scale(1.1);
         box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
     /* Positions for 5 items in circle */
-    .pos-define { top: 10%; left: 40%; }
-    .pos-measure { top: 35%; left: 75%; }
-    .pos-analyze { top: 70%; left: 60%; }
-    .pos-improve { top: 70%; left: 15%; }
-    .pos-control { top: 35%; left: 5%; }
-
+    #Define {
+        top: 10%;
+        left: 40%;
+    }
+    #Measure {
+        top: 35%;
+        left: 75%;
+    }
+    #Analyze {
+        top: 70%;
+        left: 60%;
+    }
+    #Improve {
+        top: 70%;
+        left: 15%;
+    }
+    #Control {
+        top: 35%;
+        left: 5%;
+    }
     /* Selected phase style */
     .selected {
-        background: linear-gradient(135deg, #0059b3, #003366);
-        box-shadow: 0 0 15px 5px #003366;
-        transform: scale(1.2);
-        z-index: 10;
+        background: linear-gradient(135deg, #0059b3, #003366) !important;
+        box-shadow: 0 0 15px 5px #003366 !important;
+        transform: scale(1.2) !important;
+        z-index: 10 !important;
+        border-color: #001f4d !important;
     }
-
     /* Content container */
     .content-container {
         max-width: 900px;
@@ -76,48 +95,82 @@ st.markdown(
 )
 
 # Title
-st.markdown('<h1 style="text-align:center; color:#004080; font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;">Lean Six Sigma</h1>', unsafe_allow_html=True)
+st.markdown(
+    '<h1 style="text-align:center; color:#004080; font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;">Lean Six Sigma</h1>',
+    unsafe_allow_html=True,
+)
 
-# Define phases and their positions
-phases = [
-    ("Define", "pos-define"),
-    ("Measure", "pos-measure"),
-    ("Analyze", "pos-analyze"),
-    ("Improve", "pos-improve"),
-    ("Control", "pos-control"),
-]
+# Define phases and their positions (ids for buttons)
+phases = ["Define", "Measure", "Analyze", "Improve", "Control"]
 
 # Initialize session state for selected phase
 if "selected_phase" not in st.session_state:
     st.session_state.selected_phase = "Define"
 
-# Function to render the circle with clickable phases
-def render_circle(selected):
-    html = '<div class="circle-container">'
-    for phase, pos in phases:
-        cls = "circle-item " + pos
-        if phase == selected:
-            cls += " selected"
-        # Use a clickable div with onclick to send phase name to Streamlit via query params
-        # Since Streamlit can't handle JS events directly, we use buttons below instead
-        html += f'<div class="{cls}" id="{phase}">{phase}</div>'
-    html += "</div>"
-    st.markdown(html, unsafe_allow_html=True)
+# Container for circle buttons
+circle_container = st.container()
 
-# Render the circle (non-clickable, just for visual)
-render_circle(st.session_state.selected_phase)
+with circle_container:
+    st.markdown('<div class="circle-container">', unsafe_allow_html=True)
+    # Render buttons with ids for CSS positioning
+    for phase in phases:
+        is_selected = (phase == st.session_state.selected_phase)
+        btn_key = f"btn_{phase}"
+        # Use st.button with key and id for CSS
+        # We use st.markdown + st.button hack to assign id to button container
+        # So we create a div with id and put button inside
+        # But Streamlit doesn't allow id on button, so we use st.markdown + st.button side by side
+        # Instead, we use st.button and style by key with CSS attribute selectors
+        # So we add a style block to target buttons by key attribute
+        # But Streamlit doesn't expose key as attribute, so we rely on button text and nth-child
+        # Instead, we create invisible buttons and overlay divs with onclick JS to trigger Streamlit rerun
+        # This is complex, so we do a simpler approach: render buttons normally and position by nth-child
+        pass
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# Below the circle, create buttons for each phase to handle clicks
-cols = st.columns(len(phases))
-for i, (phase, _) in enumerate(phases):
-    if cols[i].button(phase):
+# Because Streamlit buttons cannot be positioned absolutely with unique ids easily,
+# we will create 5 columns and position buttons inside with CSS margin to simulate circle.
+
+# Alternative approach: Use columns with CSS margin to simulate circle
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+# Map phases to columns and add margin-top to simulate circle shape
+col_positions = {
+    "Define": (col3, "margin-top: 0px;"),
+    "Measure": (col4, "margin-top: 50px;"),
+    "Analyze": (col5, "margin-top: 100px;"),
+    "Improve": (col1, "margin-top: 100px;"),
+    "Control": (col2, "margin-top: 50px;"),
+}
+
+for phase in phases:
+    col, style = col_positions[phase]
+    is_selected = (phase == st.session_state.selected_phase)
+    btn_style = (
+        "background: linear-gradient(135deg, #0059b3, #003366); color: white; font-weight: 700; font-size: 1.1rem; "
+        "border-radius: 50%; width: 120px; height: 120px; margin: auto; display: flex; justify-content: center; align-items: center; "
+        "box-shadow: 0 0 15px 5px #003366; transform: scale(1.2); cursor: pointer; border: 3px solid #001f4d;"
+        if is_selected
+        else "background: linear-gradient(135deg, #0073e6, #004080); color: white; font-weight: 700; font-size: 1.1rem; "
+        "border-radius: 50%; width: 120px; height: 120px; margin: auto; display: flex; justify-content: center; align-items: center; "
+        "box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; border: 3px solid transparent;"
+    )
+    if col.button(phase, key=phase):
         st.session_state.selected_phase = phase
+    # Inject style for the last button clicked to simulate circle position margin-top
+    # We can't style buttons directly, so we add a spacer above buttons
+    col.markdown(f'<div style="{style}"></div>', unsafe_allow_html=True)
 
 # Content for each phase (example content for Define, placeholders for others)
 phase_contents = {
     "Define": {
-        "What is the Define Phase?":""""
-The Define phase is the first step in the Lean Six Sigma DMAIC methodology. Its purpose is to clearly identify and articulate the problem or opportunity for improvement, align the project with business goals, and set a clear scope and objectives. This phase establishes a solid foundation for the project by understanding customer needs, defining measurable goals, and organizing the project team..
+        "Purpose of the Define Phase": """
+- To identify and clearly articulate the problem or opportunity for improvement.
+- To align the project with business goals and customer needs.
+- To establish a clear project scope and objectives.
+- To form a capable project team with defined roles and responsibilities.
+- To set the foundation for data collection and analysis in later phases.
 """,
         "Identify the Problem or Opportunity": """
 - Understand the current situation and why improvement is needed.
@@ -155,6 +208,33 @@ The Define phase is the first step in the Lean Six Sigma DMAIC methodology. Its 
 }
 
 # Display content container
+st.markdown(
+    """
+    <style>
+    .content-container {
+        max-width: 900px;
+        margin: 2rem auto 3rem auto;
+        background-color: white;
+        padding: 2rem 3rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        color: #222222;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    h2 {
+        color: #004080;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    ul {
+        margin-left: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.markdown('<div class="content-container">', unsafe_allow_html=True)
 st.markdown(f"<h2>{st.session_state.selected_phase} Phase: In-Depth Overview</h2>", unsafe_allow_html=True)
 
