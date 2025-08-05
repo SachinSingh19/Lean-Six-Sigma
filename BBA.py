@@ -3,58 +3,82 @@ import streamlit as st
 # Page config
 st.set_page_config(page_title="Lean Six Sigma", layout="wide")
 
-# Inject custom CSS for styling
+# Custom CSS to replicate LSSA style
 st.markdown(
     """
     <style>
-    /* General body */
-    .main {
-        background-color: #f5f7fa;
+    /* Body and font */
+    body, .main {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #f9f9f9;
         color: #333333;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    /* Header text */
-    .header-text {
-        color: #004080;
+    /* Header */
+    .header {
+        background-color: #004080;
+        padding: 1.5rem 2rem;
+        color: white;
+        font-size: 2.5rem;
         font-weight: 700;
-        font-size: 3.5rem;
+        letter-spacing: 1.5px;
+        border-radius: 0 0 15px 15px;
         text-align: center;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        letter-spacing: 2px;
+        margin-bottom: 2rem;
     }
-    /* Phase cards */
-    .phase-card {
-        background: white;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        transition: transform 0.2s ease-in-out;
-        cursor: pointer;
-        text-align: center;
-        color: #004080;
+    /* Navigation bar */
+    .nav-bar {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    .nav-button {
+        background-color: transparent;
+        border: none;
+        font-size: 1.1rem;
         font-weight: 600;
-        font-size: 1.25rem;
+        color: #004080;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: border-color 0.3s ease;
     }
-    .phase-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    .nav-button:hover {
+        border-bottom: 3px solid #0073e6;
     }
-    /* Content area */
-    .content-area {
-        background: white;
+    .nav-button.selected {
+        border-bottom: 3px solid #004080;
+        font-weight: 700;
+    }
+    /* Content container */
+    .content-container {
+        max-width: 900px;
+        margin: 0 auto 3rem auto;
+        background-color: white;
+        padding: 2rem 3rem;
         border-radius: 15px;
-        padding: 2rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin-top: 2rem;
         color: #222222;
     }
-    /* Video container */
-    .video-container {
-        margin-top: 1rem;
-        text-align: center;
+    /* Section titles */
+    h2 {
+        color: #004080;
+        font-weight: 700;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
     }
-    /* Button style */
+    /* Lists */
+    ul {
+        margin-left: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    /* Expanders */
+    .streamlit-expanderHeader {
+        font-weight: 600 !important;
+        font-size: 1.15rem !important;
+        color: #004080 !important;
+    }
+    /* Buttons */
     div.stButton > button:first-child {
         background-color: #004080;
         color: white;
@@ -62,9 +86,10 @@ st.markdown(
         padding: 0.5rem 1.5rem;
         font-weight: 600;
         transition: background-color 0.3s ease;
+        margin-top: 1rem;
     }
     div.stButton > button:first-child:hover {
-        background-color: #0066cc;
+        background-color: #0073e6;
         color: white;
     }
     </style>
@@ -72,101 +97,77 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Header text
-st.markdown('<div class="header-text">Lean Six Sigma</div>', unsafe_allow_html=True)
+# Header
+st.markdown('<div class="header">Lean Six Sigma</div>', unsafe_allow_html=True)
 
-# Embed the large dramatic video as header
-video_url = "https://amundi-my.sharepoint.com/personal/sachin_singh_amundi_com/Documents/A_large_dramatic_202507231819.mp4?csf=1&web=1&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=UIxLho"
-
-st.video(video_url, start_time=0)
-
-# Phases list
+# Navigation bar with phases
 phases = ["Define", "Measure", "Analyze", "Improve", "Control"]
 
-# Display phases as clickable cards in columns
-cols = st.columns(len(phases))
-selected_phase = None
+# Use session state to keep track of selected phase
+if "selected_phase" not in st.session_state:
+    st.session_state.selected_phase = "Define"
+
+# Navigation buttons
+nav_cols = st.columns(len(phases))
 for i, phase in enumerate(phases):
-    if cols[i].button(phase):
-        selected_phase = phase
+    is_selected = (phase == st.session_state.selected_phase)
+    btn_class = "nav-button selected" if is_selected else "nav-button"
+    # Use markdown with button styling
+    if nav_cols[i].button(phase):
+        st.session_state.selected_phase = phase
 
-# If no phase selected yet, default to Define
-if selected_phase is None:
-    selected_phase = "Define"
-
-# Define phase content and videos
-define_topics = {
-    "Purpose of the Define Phase": {
-        "content": """
+# Content for Define phase (your provided content)
+define_content = {
+    "Purpose of the Define Phase": """
 - To identify and clearly articulate the problem or opportunity for improvement.
 - To align the project with business goals and customer needs.
 - To establish a clear project scope and objectives.
 - To form a capable project team with defined roles and responsibilities.
 - To set the foundation for data collection and analysis in later phases.
 """,
-        "video": "https://www.youtube.com/embed/3v5v6v6v6v6"  # Replace with actual video URL
-    },
-    "Identify the Problem or Opportunity": {
-        "content": """
+    "Identify the Problem or Opportunity": """
 - Understand the current situation and why improvement is needed.
 - Develop a clear and concise Problem Statement that describes the issue in measurable terms.
 """,
-        "video": "https://www.youtube.com/embed/4x4x4x4x4x4"  # Replace with actual video URL
-    },
-    "Define the Project Goal": {
-        "content": """
+    "Define the Project Goal": """
 - Create a Goal Statement that specifies what the project aims to achieve.
 - Goals should be SMART: Specific, Measurable, Achievable, Relevant, and Time-bound.
 """,
-        "video": "https://www.youtube.com/embed/5y5y5y5y5y5"  # Replace with actual video URL
-    },
-    "Determine the Project Scope": {
-        "content": """
+    "Determine the Project Scope": """
 - Define boundaries to avoid scope creep.
 - Specify what is included and excluded from the project.
 """,
-        "video": "https://www.youtube.com/embed/6z6z6z6z6z6"  # Replace with actual video URL
-    },
-    "Identify Customers and Their Requirements": {
-        "content": """
+    "Identify Customers and Their Requirements": """
 - Internal and external customers.
 - Gather Voice of Customer (VOC) data to understand customer needs and expectations.
 """,
-        "video": "https://www.youtube.com/embed/7a7a7a7a7a7"  # Replace with actual video URL
-    },
-    "Develop a High-Level Process Map": {
-        "content": """
+    "Develop a High-Level Process Map": """
 - Use SIPOC or other mapping tools to visualize the process.
 - Identify key inputs, outputs, and stakeholders.
 """,
-        "video": "https://www.youtube.com/embed/8b8b8b8b8b8"  # Replace with actual video URL
-    },
-    "Form the Project Team": {
-        "content": """
+    "Form the Project Team": """
 - Assign roles such as Sponsor, Champion, Black Belt, Green Belt, and process owners.
 - Clarify responsibilities and communication plans.
 """,
-        "video": "https://www.youtube.com/embed/9c9c9c9c9c9"  # Replace with actual video URL
-    },
-    "Develop the Project Charter": {
-        "content": """
+    "Develop the Project Charter": """
 - Document all the above elements.
 - Obtain formal approval from stakeholders.
 """,
-        "video": "https://www.youtube.com/embed/0d0d0d0d0d0"  # Replace with actual video URL
-    },
 }
 
-def show_phase_content(phase):
-    st.markdown(f"<div class='content-area'><h2>{phase} Phase: In-Depth Overview</h2>", unsafe_allow_html=True)
-    if phase == "Define":
-        for topic, info in define_topics.items():
-            with st.expander(topic):
-                st.markdown(info["content"])
-                if st.button(f"See Video: {topic}", key=topic):
-                    st.video(info["video"])
-    else:
-        st.info(f"Content for {phase} phase will be added soon.")
-    st.markdown("</div>", unsafe_allow_html=True)
+# Placeholder content for other phases
+other_phase_content = "Content for this phase will be added soon."
 
-show_phase_content(selected_phase)
+# Content container
+st.markdown('<div class="content-container">', unsafe_allow_html=True)
+
+st.markdown(f"## {st.session_state.selected_phase} Phase: In-Depth Overview")
+
+if st.session_state.selected_phase == "Define":
+    for topic, content in define_content.items():
+        with st.expander(topic):
+            st.markdown(content)
+else:
+    st.info(other_phase_content)
+
+st.markdown("</div>", unsafe_allow_html=True)
