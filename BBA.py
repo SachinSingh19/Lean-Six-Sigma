@@ -70,5 +70,120 @@ st.markdown(
     }
     </style>
     """,
+    unsafe_allow_html=True,
+)
 
-    
+# Header with background image
+st.markdown(
+    """
+    <div style="
+        background-image: url('https://www.tqmi.com/wp-content/uploads/2022/02/How-Can-Lean-Six-Sigma-Help-You-To-Accomplish-Goals.webp');
+        background-size: cover;
+        background-position: center;
+        height: 300px;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 3.5rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+        margin-bottom: 2rem;
+    ">
+        Lean Six Sigma
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Phases list
+phases = ["Define", "Measure", "Analyze", "Improve", "Control"]
+
+# Display phases as clickable cards in columns
+cols = st.columns(len(phases))
+selected_phase = None
+for i, phase in enumerate(phases):
+    if cols[i].button(phase):
+        selected_phase = phase
+
+# If no phase selected yet, default to Define
+if selected_phase is None:
+    selected_phase = "Define"
+
+# Define phase content and videos
+define_topics = {
+    "Purpose of the Define Phase": {
+        "content": """
+- To identify and clearly articulate the problem or opportunity for improvement.
+- To align the project with business goals and customer needs.
+- To establish a clear project scope and objectives.
+- To form a capable project team with defined roles and responsibilities.
+- To set the foundation for data collection and analysis in later phases.
+""",
+        "video": "https://www.youtube.com/embed/3v5v6v6v6v6"  # Replace with actual video URL
+    },
+    "Identify the Problem or Opportunity": {
+        "content": """
+- Understand the current situation and why improvement is needed.
+- Develop a clear and concise Problem Statement that describes the issue in measurable terms.
+""",
+        "video": "https://www.youtube.com/embed/4x4x4x4x4x4"  # Replace with actual video URL
+    },
+    "Define the Project Goal": {
+        "content": """
+- Create a Goal Statement that specifies what the project aims to achieve.
+- Goals should be SMART: Specific, Measurable, Achievable, Relevant, and Time-bound.
+""",
+        "video": "https://www.youtube.com/embed/5y5y5y5y5y5"  # Replace with actual video URL
+    },
+    "Determine the Project Scope": {
+        "content": """
+- Define boundaries to avoid scope creep.
+- Specify what is included and excluded from the project.
+""",
+        "video": "https://www.youtube.com/embed/6z6z6z6z6z6"  # Replace with actual video URL
+    },
+    "Identify Customers and Their Requirements": {
+        "content": """
+- Internal and external customers.
+- Gather Voice of Customer (VOC) data to understand customer needs and expectations.
+""",
+        "video": "https://www.youtube.com/embed/7a7a7a7a7a7"  # Replace with actual video URL
+    },
+    "Develop a High-Level Process Map": {
+        "content": """
+- Use SIPOC or other mapping tools to visualize the process.
+- Identify key inputs, outputs, and stakeholders.
+""",
+        "video": "https://www.youtube.com/embed/8b8b8b8b8b8"  # Replace with actual video URL
+    },
+    "Form the Project Team": {
+        "content": """
+- Assign roles such as Sponsor, Champion, Black Belt, Green Belt, and process owners.
+- Clarify responsibilities and communication plans.
+""",
+        "video": "https://www.youtube.com/embed/9c9c9c9c9c9"  # Replace with actual video URL
+    },
+    "Develop the Project Charter": {
+        "content": """
+- Document all the above elements.
+- Obtain formal approval from stakeholders.
+""",
+        "video": "https://www.youtube.com/embed/0d0d0d0d0d0"  # Replace with actual video URL
+    },
+}
+
+def show_phase_content(phase):
+    st.markdown(f"<div class='content-area'><h2>{phase} Phase: In-Depth Overview</h2>", unsafe_allow_html=True)
+    if phase == "Define":
+        for topic, info in define_topics.items():
+            with st.expander(topic):
+                st.markdown(info["content"])
+                if st.button(f"See Video: {topic}", key=topic):
+                    st.video(info["video"])
+    else:
+        st.info(f"Content for {phase} phase will be added soon.")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+show_phase_content(selected_phase)
