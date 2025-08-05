@@ -116,7 +116,7 @@ for i, (phase, _) in enumerate(phases):
 # Content for each phase (example content for Define, placeholders for others)
 phase_contents = {
     "Define": {
-        "What is the Define Phase?
+        "What is the Define Phase?":""""
 The Define phase is the first step in the Lean Six Sigma DMAIC methodology. Its purpose is to clearly identify and articulate the problem or opportunity for improvement, align the project with business goals, and set a clear scope and objectives. This phase establishes a solid foundation for the project by understanding customer needs, defining measurable goals, and organizing the project team..
 """,
         "Identify the Problem or Opportunity": """
