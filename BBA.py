@@ -1,23 +1,24 @@
 import streamlit as st
 
-st.set_page_config(page_title="Lean Six Sigma Circular Phases", layout="wide")
+st.set_page_config(page_title="Lean Six Sigma Circular Layout", layout="wide")
 
-# CSS for circular layout and styling buttons as circles
+# CSS for circle layout and styling
 st.markdown(
     """
     <style>
-    .circle-container {
+    .circle-wrapper {
         position: relative;
-        width: 400px;
-        height: 400px;
+        width: 450px;
+        height: 450px;
         margin: 2rem auto 3rem auto;
+        border: 4px solid #004080;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, #e6f0ff 60%, transparent 100%);
     }
-    /* Hide default Streamlit button style */
-    div.stButton > button {
-        all: unset;
+    .phase-circle {
         position: absolute;
-        width: 120px;
-        height: 120px;
+        width: 110px;
+        height: 110px;
         background: linear-gradient(135deg, #0073e6, #004080);
         color: white;
         border-radius: 50%;
@@ -29,45 +30,49 @@ st.markdown(
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        user-select: none;
         text-align: center;
         padding: 10px;
+        user-select: none;
         text-transform: uppercase;
         letter-spacing: 1.2px;
         border: 3px solid transparent;
     }
-    div.stButton > button:hover {
+    .phase-circle:hover {
         transform: scale(1.1);
         box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
-    /* Positions for 5 items in circle */
+    .selected {
+        background: linear-gradient(135deg, #0059b3, #003366) !important;
+        box-shadow: 0 0 20px 6px #003366 !important;
+        transform: scale(1.2) !important;
+        border-color: #001f4d !important;
+        z-index: 10;
+    }
+    /* Positions for 5 phases evenly spaced on circle */
     #Define {
         top: 10%;
-        left: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
     #Measure {
         top: 35%;
-        left: 75%;
+        left: 85%;
+        transform: translate(-50%, -50%);
     }
     #Analyze {
-        top: 70%;
-        left: 60%;
+        top: 75%;
+        left: 75%;
+        transform: translate(-50%, -50%);
     }
     #Improve {
-        top: 70%;
-        left: 15%;
+        top: 75%;
+        left: 25%;
+        transform: translate(-50%, -50%);
     }
     #Control {
         top: 35%;
-        left: 5%;
-    }
-    /* Selected phase style */
-    .selected {
-        background: linear-gradient(135deg, #0059b3, #003366) !important;
-        box-shadow: 0 0 15px 5px #003366 !important;
-        transform: scale(1.2) !important;
-        z-index: 10 !important;
-        border-color: #001f4d !important;
+        left: 15%;
+        transform: translate(-50%, -50%);
     }
     /* Content container */
     .content-container {
@@ -100,67 +105,37 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Define phases and their positions (ids for buttons)
+# Phases list
 phases = ["Define", "Measure", "Analyze", "Improve", "Control"]
 
 # Initialize session state for selected phase
 if "selected_phase" not in st.session_state:
     st.session_state.selected_phase = "Define"
 
-# Container for circle buttons
-circle_container = st.container()
-
-with circle_container:
-    st.markdown('<div class="circle-container">', unsafe_allow_html=True)
-    # Render buttons with ids for CSS positioning
-    for phase in phases:
-        is_selected = (phase == st.session_state.selected_phase)
-        btn_key = f"btn_{phase}"
-        # Use st.button with key and id for CSS
-        # We use st.markdown + st.button hack to assign id to button container
-        # So we create a div with id and put button inside
-        # But Streamlit doesn't allow id on button, so we use st.markdown + st.button side by side
-        # Instead, we use st.button and style by key with CSS attribute selectors
-        # So we add a style block to target buttons by key attribute
-        # But Streamlit doesn't expose key as attribute, so we rely on button text and nth-child
-        # Instead, we create invisible buttons and overlay divs with onclick JS to trigger Streamlit rerun
-        # This is complex, so we do a simpler approach: render buttons normally and position by nth-child
-        pass
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Because Streamlit buttons cannot be positioned absolutely with unique ids easily,
-# we will create 5 columns and position buttons inside with CSS margin to simulate circle.
-
-# Alternative approach: Use columns with CSS margin to simulate circle
-
-col1, col2, col3, col4, col5 = st.columns(5)
-
-# Map phases to columns and add margin-top to simulate circle shape
-col_positions = {
-    "Define": (col3, "margin-top: 0px;"),
-    "Measure": (col4, "margin-top: 50px;"),
-    "Analyze": (col5, "margin-top: 100px;"),
-    "Improve": (col1, "margin-top: 100px;"),
-    "Control": (col2, "margin-top: 50px;"),
-}
-
+# Render the circle with phases as HTML divs
+circle_html = '<div class="circle-wrapper">'
 for phase in phases:
-    col, style = col_positions[phase]
-    is_selected = (phase == st.session_state.selected_phase)
-    btn_style = (
-        "background: linear-gradient(135deg, #0059b3, #003366); color: white; font-weight: 700; font-size: 1.1rem; "
-        "border-radius: 50%; width: 120px; height: 120px; margin: auto; display: flex; justify-content: center; align-items: center; "
-        "box-shadow: 0 0 15px 5px #003366; transform: scale(1.2); cursor: pointer; border: 3px solid #001f4d;"
-        if is_selected
-        else "background: linear-gradient(135deg, #0073e6, #004080); color: white; font-weight: 700; font-size: 1.1rem; "
-        "border-radius: 50%; width: 120px; height: 120px; margin: auto; display: flex; justify-content: center; align-items: center; "
-        "box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; border: 3px solid transparent;"
-    )
-    if col.button(phase, key=phase):
-        st.session_state.selected_phase = phase
-    # Inject style for the last button clicked to simulate circle position margin-top
-    # We can't style buttons directly, so we add a spacer above buttons
-    col.markdown(f'<div style="{style}"></div>', unsafe_allow_html=True)
+    selected_class = "phase-circle selected" if phase == st.session_state.selected_phase else "phase-circle"
+    # Each div has an id for CSS positioning and a data-phase attribute for JS (not used here)
+    circle_html += f'<form method="post"><button name="phase" value="{phase}" class="{selected_class}" id="{phase}">{phase}</button></form>'
+circle_html += "</div>"
+
+st.markdown(circle_html, unsafe_allow_html=True)
+
+# Capture button clicks via form submission
+clicked_phase = st.experimental_get_query_params().get("phase", [None])[0]
+
+# Streamlit doesn't support form button clicks inside markdown, so we use st.form workaround:
+# Instead, we create invisible buttons below the circle to capture clicks and sync with circle buttons visually.
+
+# Alternative approach: Use st.form with buttons for each phase, styled to be invisible, and sync selection.
+
+with st.form("phase_form"):
+    cols = st.columns(5)
+    for i, phase in enumerate(phases):
+        if cols[i].form_submit_button(phase):
+            st.session_state.selected_phase = phase
+    st.form_submit_button("Submit", disabled=True, key="dummy")  # Dummy to keep form valid
 
 # Content for each phase (example content for Define, placeholders for others)
 phase_contents = {
@@ -208,33 +183,6 @@ phase_contents = {
 }
 
 # Display content container
-st.markdown(
-    """
-    <style>
-    .content-container {
-        max-width: 900px;
-        margin: 2rem auto 3rem auto;
-        background-color: white;
-        padding: 2rem 3rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        color: #222222;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    h2 {
-        color: #004080;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-    ul {
-        margin-left: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 st.markdown('<div class="content-container">', unsafe_allow_html=True)
 st.markdown(f"<h2>{st.session_state.selected_phase} Phase: In-Depth Overview</h2>", unsafe_allow_html=True)
 
