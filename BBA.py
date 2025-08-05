@@ -2,11 +2,11 @@ import streamlit as st
 
 st.set_page_config(page_title="Lean Six Sigma Circular Layout", layout="wide")
 
-# CSS for circle layout and styling buttons as circles
+# CSS for circle layout and styling
 st.markdown(
     """
     <style>
-    .circle-container {
+    .circle-wrapper {
         position: relative;
         width: 450px;
         height: 450px;
@@ -15,58 +15,66 @@ st.markdown(
         border-radius: 50%;
         background: radial-gradient(circle at center, #e6f0ff 60%, transparent 100%);
     }
-    /* Style for buttons as circles */
-    div.stButton > button {
+    .phase-circle {
+        position: absolute;
+        width: 110px;
+        height: 110px;
         background: linear-gradient(135deg, #0073e6, #004080);
         color: white;
         border-radius: 50%;
-        width: 110px;
-        height: 110px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-weight: 700;
         font-size: 1.1rem;
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+        padding: 10px;
         user-select: none;
         text-transform: uppercase;
         letter-spacing: 1.2px;
         border: 3px solid transparent;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 10px;
-        margin: 0 auto;
+        transform-origin: center center;
+        user-select: none;
     }
-    div.stButton > button:hover {
+    .phase-circle:hover {
         transform: scale(1.1);
         box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
-    /* Selected button style */
-    div.stButton > button.selected {
+    .selected {
         background: linear-gradient(135deg, #0059b3, #003366) !important;
         box-shadow: 0 0 20px 6px #003366 !important;
         transform: scale(1.2) !important;
         border-color: #001f4d !important;
         z-index: 10;
     }
-    /* Positions for buttons in circle using flexbox and margin */
-    .circle-row {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 0;
-        padding: 0;
+    /* Positions for 5 phases evenly spaced on circle (clockwise starting top) */
+    #Define {
+        top: 5%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
-    .circle-row.top {
-        margin-bottom: 40px;
+    #Measure {
+        top: 30%;
+        left: 85%;
+        transform: translate(-50%, -50%);
     }
-    .circle-row.middle {
-        justify-content: space-between;
-        margin-bottom: 40px;
+    #Analyze {
+        top: 70%;
+        left: 75%;
+        transform: translate(-50%, -50%);
     }
-    .circle-row.bottom {
-        justify-content: center;
+    #Improve {
+        top: 70%;
+        left: 25%;
+        transform: translate(-50%, -50%);
+    }
+    #Control {
+        top: 30%;
+        left: 15%;
+        transform: translate(-50%, -50%);
     }
     /* Content container */
     .content-container {
@@ -99,59 +107,41 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Phases list
+# Phases list in order
 phases = ["Define", "Measure", "Analyze", "Improve", "Control"]
 
 # Initialize session state for selected phase
 if "selected_phase" not in st.session_state:
     st.session_state.selected_phase = "Define"
 
-# Function to render buttons arranged in a circle-like layout using rows
-def render_circle_buttons(selected_phase):
-    # Top row: Define
-    cols_top = st.columns([1, 1, 1, 1, 1])
-    with cols_top[2]:
-        if st.button("Define", key="Define", help="Define Phase"):
-            st.session_state.selected_phase = "Define"
-    # Middle row: Control and Measure
-    cols_middle = st.columns([1, 1, 1, 1, 1])
-    with cols_middle[0]:
-        if st.button("Control", key="Control", help="Control Phase"):
-            st.session_state.selected_phase = "Control"
-    with cols_middle[4]:
-        if st.button("Measure", key="Measure", help="Measure Phase"):
-            st.session_state.selected_phase = "Measure"
-    # Bottom row: Improve and Analyze
-    cols_bottom = st.columns([1, 1, 1, 1, 1])
-    with cols_bottom[1]:
-        if st.button("Improve", key="Improve", help="Improve Phase"):
-            st.session_state.selected_phase = "Improve"
-    with cols_bottom[3]:
-        if st.button("Analyze", key="Analyze", help="Analyze Phase"):
-            st.session_state.selected_phase = "Analyze"
+# Render the circle with clickable phases
+circle_html = '<div class="circle-wrapper">'
+for phase in phases:
+    selected_class = "phase-circle selected" if phase == st.session_state.selected_phase else "phase-circle"
+    # Use a form with a button for each phase to capture clicks
+    circle_html += f'''
+    <form method="post" style="display:inline;">
+        <button name="phase" value="{phase}" class="{selected_class}" id="{phase}" type="submit">{phase}</button>
+    </form>
+    '''
+circle_html += "</div>"
 
-    # Add CSS to highlight selected button
-    # Streamlit doesn't allow direct class manipulation, so we use JS injection hack
-    # But here we use a workaround: re-render buttons with selected class by injecting CSS targeting button text
+st.markdown(circle_html, unsafe_allow_html=True)
 
-    # Inject JS to add 'selected' class to the selected button
-    st.markdown(
-        f"""
-        <script>
-        const buttons = window.parent.document.querySelectorAll('button[kind="primary"]');
-        buttons.forEach(btn => {{
-            if(btn.innerText.toLowerCase() === "{selected_phase.lower()}") {{
-                btn.classList.add('selected');
-            }} else {{
-                btn.classList.remove('selected');
-            }}
-        }});
-        </script>
-        """,
-        unsafe_allow_html=True,
-    )
+# Capture which phase button was clicked
+clicked_phase = st.experimental_get_query_params().get("phase", [None])[0]
 
-render_circle_buttons(st.session_state.selected_phase)
+# Streamlit does not support form button clicks inside markdown, so we use st.button below as fallback
+# Instead, we check if a form was submitted via st.experimental_get_query_params or use st.button fallback
+
+# Fallback buttons hidden (for accessibility)
+for phase in phases:
+    if st.button(phase, key=f"btn_{phase}", help=f"Select {phase} phase"):
+        st.session_state.selected_phase = phase
+
+# Update selected phase if clicked via form
+if clicked_phase in phases:
+    st.session_state.selected_phase = clicked_phase
 
 # Content for each phase (example content for Define, placeholders for others)
 phase_contents = {
